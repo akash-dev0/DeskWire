@@ -1,0 +1,9 @@
+{
+  "name": "deskwire",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Autonomous editorial desk — Research, Write, Critique multi-agent pipeline with streaming, auth, and archive.",
+  "dependencies": {
+    "@upstash/redis": "^1.34.0"
+  }
+}

@@ -3,8 +3,13 @@
 // Sessions are stateless signed tokens (HMAC), so no session table required.
 // User records live in Vercel KV.
 
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import crypto from 'crypto';
+
+const kv = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
 
 const SESSION_SECRET = process.env.SESSION_SECRET; // set this in Vercel env vars
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days

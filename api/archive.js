@@ -5,9 +5,14 @@
 // POST (authed)             -> save a run, returns { id, shareUrl }
 // DELETE ?id=<id> (authed)  -> delete a run
 
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { verifyToken } from './auth.js';
 import crypto from 'crypto';
+
+const kv = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
 
 function getAuthedUser(req) {
   const authHeader = req.headers.authorization || '';
