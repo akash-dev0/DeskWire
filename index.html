@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DESKWIRE — Research · Write · Critique</title>
+<style>
+  :root {
+    --ink: #0b0d0c;
+    --ink-2: #141715;
+    --ink-3: #1c201d;
+    --paper: #f5f1e8;
+    --paper-dim: #e8e2d3;
+    --wire-red: #c9482f;
+    --verified: #3a5a40;
+    --brass: #8b7355;
+    --info: #6b7fa3;
+    --line: rgba(245,241,232,0.14);
+    --line-strong: rgba(245,241,232,0.28);
+    --text-dim: rgba(245,241,232,0.55);
+    --mono: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--sans);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(201,72,47,0.05), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(58,90,64,0.05), transparent 40%);
+  }
+  a { color: inherit; }
+  button { font-family: inherit; }
+
+  /* ===== MASTHEAD ===== */
+  .masthead {
+    border-bottom: 1px solid var(--line-strong);
+    padding: 20px 32px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .masthead-left { display: flex; align-items: baseline; gap: 14px; }
+  .wordmark { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: 0.5px; }
+  .wordmark span { color: var(--wire-red); }
+  .tagline { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+  .masthead-right { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); }
+  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--verified); margin-right: 6px; box-shadow: 0 0 6px var(--verified); }
+  .byline { color: var(--paper); }
+  .btn-ghost {
+    background: none; border: 1px solid var(--line-strong); color: var(--text-dim);
+    padding: 5px 10px; border-radius: 3px; font-family: var(--mono); font-size: 10px;
+    cursor: pointer; letter-spacing: 0.5px;
+  }
+  .btn-ghost:hover { color: var(--paper); border-color: var(--paper); }
+
+  .shell { max-width: 900px; margin: 0 auto; padding: 32px 24px 90px; }
+
+  /* ===== LOGIN ===== */
+  .login-wrap { max-width: 380px; margin: 80px auto; }
+  .login-card {
+    border: 1px solid var(--line-strong); background: var(--ink-2); border-radius: 4px; padding: 28px;
+  }
+  .login-card h2 { font-family: var(--serif); margin: 0 0 4px; font-size: 20px; }
+  .login-card .sub { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .field input {
+    width: 100%; background: var(--ink); border: 1px solid var(--line-strong); color: var(--paper);
+    padding: 10px 12px; border-radius: 3px; font-family: var(--sans); font-size: 14px;
+  }
+  .field input:focus { outline: none; border-color: var(--wire-red); }
+  .login-actions { display: flex; gap: 8px; margin-top: 18px; }
+  .btn-primary {
+    background: var(--wire-red); color: var(--paper); border: none; padding: 10px 18px; border-radius: 3px;
+    font-family: var(--mono); font-weight: 600; font-size: 11.5px; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; flex: 1;
+  }
+  .btn-primary:hover { background: #b83e28; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .toggle-mode { text-align: center; margin-top: 14px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); cursor: pointer; }
+  .toggle-mode:hover { color: var(--paper); }
+  .login-error { color: var(--wire-red); font-family: var(--mono); font-size: 11px; margin-top: 10px; min-height: 14px; }
+
+  /* ===== CONFIG BAR ===== */
+  .config-bar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+  .config-pill {
+    font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); border: 1px solid var(--line);
+    padding: 5px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer;
+    user-select: none; background: transparent;
+  }
+  .config-pill input[type="checkbox"] { accent-color: var(--wire-red); }
+  .config-pill.active { border-color: var(--verified); color: var(--paper); }
+  select#model-picker {
+    background: var(--ink-2); color: var(--paper); border: 1px solid var(--line); border-radius: 20px;
+    font-family: var(--mono); font-size: 10.5px; padding: 5px 10px; cursor: pointer;
+  }
+  .config-spacer { flex: 1; }
+  .link-mono { font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dotted var(--text-dim); cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; }
+  .link-mono:hover { color: var(--paper); border-color: var(--paper); }
+
+  /* ===== PROMPT EDITOR ===== */
+  .prompt-editor { display: none; border: 1px solid var(--line); border-radius: 3px; background: var(--ink-2); padding: 14px; margin-bottom: 14px; }
+  .prompt-editor.open { display: block; }
+  .prompt-editor h4 { margin: 0 0 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); }
+  .prompt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .prompt-grid textarea {
+    width: 100%; min-height: 100px; background: var(--ink); border: 1px solid var(--line); color: var(--paper);
+    font-family: var(--mono); font-size: 11px; padding: 8px; border-radius: 3px; resize: vertical;
+  }
+  .prompt-grid label { display: block; font-family: var(--mono); font-size: 9.5px; color: var(--text-dim); margin-bottom: 4px; text-transform: uppercase; }
+  @media (max-width: 700px) { .prompt-grid { grid-template-columns: 1fr; } }
+
+  /* ===== DESK ===== */
+  .desk { border: 1px solid var(--line-strong); background: var(--ink-2); border-radius: 3px; padding: 20px; margin: 18px 0 30px; position: relative; }
+  .desk::before {
+    content: 'ASSIGNMENT'; position: absolute; top: -9px; left: 16px; background: var(--ink); padding: 0 8px;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 2px; color: var(--brass);
+  }
+  textarea#topic {
+    width: 100%; resize: vertical; min-height: 52px; background: transparent; border: none; color: var(--paper);
+    font-family: var(--serif); font-size: 17px; line-height: 1.5; padding: 6px 4px;
+  }
+  textarea#topic::placeholder { color: rgba(245,241,232,0.35); font-style: italic; }
+  textarea#topic:focus { outline: none; }
+  .desk-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); flex-wrap: wrap; gap: 10px; }
+  .hint { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .run-group { display: flex; gap: 8px; align-items: center; }
+  button#run {
+    background: var(--wire-red); color: var(--paper); border: none; padding: 10px 22px; border-radius: 3px;
+    font-family: var(--mono); font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.15s;
+  }
+  button#run:hover:not(:disabled) { background: #b83e28; }
+  button#run:disabled { opacity: 0.4; cursor: not-allowed; }
+  button#cancel-run { display: none; background: none; border: 1px solid var(--wire-red); color: var(--wire-red); padding: 9px 16px; border-radius: 3px; font-family: var(--mono); font-size: 11px; cursor: pointer; }
+
+  .skip-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .skip-chip { font-family: var(--mono); font-size: 9.5px; color: var(--text-dim); border: 1px dashed var(--line); padding: 3px 8px; border-radius: 12px; cursor: pointer; }
+  .skip-chip.active { border-color: var(--brass); color: var(--brass); border-style: solid; }
+
+  /* ===== WIRE FEED ===== */
+  .feed { position: relative; }
+  .dispatch { display: none; position: relative; animation: dropIn 0.35s ease; }
+  .dispatch.visible { display: block; }
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .dispatch-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 4px 10px; border-top: 1px dashed var(--line-strong); flex-wrap: wrap; gap: 8px; }
+  .dispatch:first-child .dispatch-header { border-top: none; }
+  .dh-left { display: flex; align-items: center; gap: 10px; }
+  .wire-code { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; background: var(--paper-dim); color: var(--ink); }
+  .wire-code.researcher { background: var(--brass); }
+  .wire-code.writer { background: var(--info); }
+  .wire-code.critic { background: var(--wire-red); }
+  .wire-code.final { background: var(--verified); }
+  .role-name { font-family: var(--serif); font-size: 14px; font-weight: 700; }
+  .role-sub { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .dh-right { display: flex; align-items: center; gap: 10px; }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--brass); }
+  .pulse.working { animation: blink 0.9s infinite; background: var(--wire-red); }
+  .pulse.done { background: var(--verified); }
+  @keyframes blink { 50% { opacity: 0.25; } }
+  .elapsed { font-family: var(--mono); font-size: 10px; color: var(--text-dim); min-width: 34px; text-align: right; }
+  .token-count { font-family: var(--mono); font-size: 9.5px; color: var(--text-dim); }
+
+  .dispatch-body {
+    padding: 4px 4px 12px; font-family: var(--serif); font-size: 15.5px; line-height: 1.75; white-space: pre-wrap;
+    color: var(--paper); border-left: 2px solid var(--line); padding-left: 18px; margin-left: 6px;
+  }
+  .dispatch.final .dispatch-body { border-left-color: var(--verified); }
+  .dispatch.critic .dispatch-body { border-left-color: var(--wire-red); font-family: var(--sans); font-size: 13.5px; color: var(--text-dim); }
+
+  .sources-box { margin: 4px 4px 16px 24px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+  .sources-box summary { cursor: pointer; color: var(--brass); letter-spacing: 0.5px; text-transform: uppercase; font-size: 9.5px; }
+  .sources-box a { display: block; margin-top: 6px; color: var(--info); word-break: break-all; }
+
+  .dispatch-actions { display: flex; gap: 14px; padding: 0 4px 10px 24px; flex-wrap: wrap; }
+  .mini-btn { font-family: var(--mono); font-size: 10px; color: var(--text-dim); background: none; border: none; cursor: pointer; padding: 0; letter-spacing: 0.5px; text-transform: uppercase; }
+  .mini-btn:hover { color: var(--paper); }
+
+  /* Diff view */
+  .diff-box { margin: 4px 4px 16px 24px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 3px; font-family: var(--sans); font-size: 13px; line-height: 1.65; display: none; }
+  .diff-box.open { display: block; }
+  .diff-add { background: rgba(58,90,64,0.35); color: #b9ddb6; }
+  .diff-del { background: rgba(201,72,47,0.28); color: #f0b6a8; text-decoration: line-through; }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px; border: 1px dashed var(--line); border-radius: 3px; }
+  .empty-state .glyph { font-size: 22px; margin-bottom: 10px; display: block; color: var(--brass); }
+
+  /* Tags + word count on final */
+  .final-meta { display: flex; gap: 10px; align-items: center; padding: 0 4px 10px 24px; flex-wrap: wrap; }
+  .tag-input {
+    background: var(--ink); border: 1px solid var(--line); color: var(--paper); font-family: var(--mono); font-size: 10.5px;
+    padding: 4px 8px; border-radius: 12px; width: 140px;
+  }
+  .tag-chip { font-family: var(--mono); font-size: 10px; background: var(--ink-3); border: 1px solid var(--line); padding: 3px 9px; border-radius: 12px; color: var(--brass); }
+  .word-count { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+  /* Archive */
+  .archive-toggle {
+    font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); margin-top: 40px; padding-top: 14px;
+    border-top: 1px solid var(--line); cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  }
+  .archive-filter { display: none; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .archive-filter.open { display: flex; }
+  .archive-filter input { background: var(--ink-2); border: 1px solid var(--line); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 5px 10px; border-radius: 3px; flex: 1; min-width: 140px; }
+  .archive-list { margin-top: 10px; display: none; flex-direction: column; gap: 6px; }
+  .archive-list.open { display: flex; }
+  .archive-item { font-family: var(--mono); font-size: 11px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--text-dim); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .archive-item:hover { border-color: var(--brass); color: var(--paper); }
+  .archive-item .ai-tags { display: flex; gap: 4px; }
+  .archive-item .ai-tags span { background: var(--ink-3); padding: 1px 6px; border-radius: 8px; font-size: 9px; color: var(--brass); }
+  .archive-del { color: var(--wire-red); background: none; border: none; cursor: pointer; font-family: var(--mono); font-size: 12px; }
+
+  /* Quota */
+  .quota-box { margin-top: 40px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 3px; font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .quota-bar { width: 100%; height: 4px; background: var(--ink-3); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .quota-fill { height: 100%; background: var(--verified); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--paper);
+    color: var(--ink); font-family: var(--mono); font-size: 11.5px; padding: 10px 18px; border-radius: 3px;
+    opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 600px) {
+    .masthead { flex-direction: column; align-items: flex-start; }
+    .wordmark { font-size: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-wrap" id="login-screen">
+  <div class="masthead-left" style="margin-bottom:24px; justify-content:center; display:flex;">
+    <div class="wordmark">DESK<span>WIRE</span></div>
+  </div>
+  <div class="login-card">
+    <h2 id="login-title">Sign in to the desk</h2>
+    <div class="sub">Your archive, prompts, and dispatches are saved to your account.</div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="login-username" autocomplete="username" placeholder="e.g. j-editor">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" autocomplete="current-password" placeholder="min. 6 characters">
+    </div>
+    <div class="login-actions">
+      <button class="btn-primary" id="login-submit">Sign in</button>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="toggle-mode" id="toggle-mode">Need an account? Register instead →</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app" style="display:none;">
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="wordmark">DESK<span>WIRE</span></div>
+      <div class="tagline">Autonomous Editorial Desk</div>
+    </div>
+    <div class="masthead-right">
+      <span><span class="status-dot"></span>Groq · <span class="byline" id="model-label">Llama 3.3 70B</span></span>
+      <span class="byline" id="current-user"></span>
+      <button class="btn-ghost" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="shell">
+
+    <div class="config-bar">
+      <label class="config-pill active" id="pill-search">
+        <input type="checkbox" id="chk-search" checked>
+        Live web research
+      </label>
+      <label class="config-pill" id="pill-cycles">
+        <input type="checkbox" id="chk-extra-cycle">
+        Extra critique pass
+      </label>
+      <select id="model-picker">
+        <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+        <option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+        <option value="gemma2-9b-it">Gemma2 9B</option>
+      </select>
+      <div class="config-spacer"></div>
+      <button class="link-mono" id="toggle-prompts">edit agent prompts</button>
+    </div>
+
+    <div class="prompt-editor" id="prompt-editor">
+      <h4>Agent instructions — leave blank to use defaults</h4>
+      <div class="prompt-grid">
+        <div>
+          <label>Researcher</label>
+          <textarea id="prompt-researcher" placeholder="Default: organize findings with [n] citations..."></textarea>
+        </div>
+        <div>
+          <label>Writer</label>
+          <textarea id="prompt-writer" placeholder="Default: write using only findings..."></textarea>
+        </div>
+        <div>
+          <label>Critic</label>
+          <textarea id="prompt-critic" placeholder="Default: flag unsupported claims..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="desk">
+      <textarea id="topic" placeholder="File an assignment — e.g. &quot;Explain how transformer attention works&quot;"></textarea>
+      <div class="skip-row">
+        <span class="skip-chip" id="skip-research" data-stage="researcher">skip research</span>
+        <span class="skip-chip" id="skip-writer" data-stage="writer">skip draft</span>
+        <span class="skip-chip" id="skip-critic" data-stage="critic">skip critique</span>
+      </div>
+      <div class="desk-actions">
+        <div class="hint">⌘ / Ctrl + Enter to run</div>
+        <div class="run-group">
+          <button id="cancel-run">Cancel</button>
+          <button id="run">Run the desk</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="feed" id="feed">
+      <div class="empty-state" id="empty-state">
+        <span class="glyph">✳</span>
+        No dispatches yet. File an assignment above to start the wire.
+      </div>
+
+      <div class="dispatch researcher" id="stage-researcher">
+        <div class="dispatch-header">
+          <div class="dh-left">
+            <span class="wire-code researcher">R-01</span>
+            <div><div class="role-name">Researcher</div><div class="role-sub">gathering & organizing sources</div></div>
+          </div>
+          <div class="dh-right">
+            <span class="token-count" id="tok-researcher"></span>
+            <span class="elapsed" id="time-researcher"></span>
+            <span class="pulse" id="dot-researcher"></span>
+          </div>
+        </div>
+        <div class="dispatch-body" id="out-researcher"></div>
+        <details class="sources-box" id="sources-box" style="display:none;">
+          <summary>Sources</summary>
+          <div id="sources-list"></div>
+        </details>
+        <div class="dispatch-actions"><button class="mini-btn" data-copy="researcher">Copy</button></div>
+      </div>
+
+      <div class="dispatch writer" id="stage-writer">
+        <div class="dispatch-header">
+          <div class="dh-left">
+            <span class="wire-code writer">W-02</span>
+            <div><div class="role-name">Writer</div><div class="role-sub">first draft, findings-only</div></div>
+          </div>
+          <div class="dh-right">
+            <span class="token-count" id="tok-writer"></span>
+            <span class="elapsed" id="time-writer"></span>
+            <span class="pulse" id="dot-writer"></span>
+          </div>
+        </div>
+        <div class="dispatch-body" id="out-writer"></div>
+        <div class="dispatch-actions"><button class="mini-btn" data-copy="writer">Copy</button></div>
+      </div>
+
+      <div class="dispatch critic" id="stage-critic">
+        <div class="dispatch-header">
+          <div class="dh-left">
+            <span class="wire-code critic">C-03</span>
+            <div><div class="role-name">Critic</div><div class="role-sub">fact-checking against findings</div></div>
+          </div>
+          <div class="dh-right">
+            <span class="token-count" id="tok-critic"></span>
+            <span class="elapsed" id="time-critic"></span>
+            <span class="pulse" id="dot-critic"></span>
+          </div>
+        </div>
+        <div class="dispatch-body" id="out-critic"></div>
+        <div class="dispatch-actions"><button class="mini-btn" data-copy="critic">Copy</button></div>
+      </div>
+
+      <div class="dispatch final" id="stage-final">
+        <div class="dispatch-header">
+          <div class="dh-left">
+            <span class="wire-code final">F-04</span>
+            <div><div class="role-name">Final Copy</div><div class="role-sub">revised & cleared for print</div></div>
+          </div>
+          <div class="dh-right">
+            <span class="token-count" id="tok-final"></span>
+            <span class="elapsed" id="time-final"></span>
+            <span class="pulse" id="dot-final"></span>
+          </div>
+        </div>
+        <div class="dispatch-body" id="out-final"></div>
+        <div class="diff-box" id="diff-box"></div>
+        <div class="final-meta">
+          <span class="word-count" id="word-count"></span>
+          <input type="text" class="tag-input" id="tag-input" placeholder="add tags, comma sep">
+        </div>
+        <div class="dispatch-actions">
+          <button class="mini-btn" data-copy="final">Copy final</button>
+          <button class="mini-btn" id="export-md">Export .md</button>
+          <button class="mini-btn" id="export-pdf">Export .pdf</button>
+          <button class="mini-btn" id="toggle-diff">Show diff vs draft</button>
+          <button class="mini-btn" id="save-run">Save to archive</button>
+          <button class="mini-btn" id="share-run">Copy share link</button>
+          <button class="mini-btn" id="retry-run">Run again</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="archive-toggle" id="archive-toggle">
+      <span>ARCHIVE — saved dispatches (<span id="archive-count">0</span>)</span>
+      <span id="archive-caret">▾</span>
+    </div>
+    <div class="archive-filter" id="archive-filter">
+      <input type="text" id="archive-search" placeholder="filter by topic or tag…">
+    </div>
+    <div class="archive-list" id="archive-list"></div>
+
+    <div class="quota-box">
+      <div>
+        <div>SESSION TOKEN USAGE (approx.)</div>
+        <div class="quota-bar"><div class="quota-fill" id="quota-fill" style="width:0%"></div></div>
+      </div>
+      <div id="quota-text">0 tokens this session</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = localStorage.getItem('deskwire_api_base') || window.location.origin;
+  const $ = (id) => document.getElementById(id);
+  let sessionToken = localStorage.getItem('deskwire_token') || null;
+  let currentUsername = localStorage.getItem('deskwire_username') || null;
+  let isRegisterMode = false;
+  let activeAbortController = null;
+  let sessionTokenTotal = 0;
+  const QUOTA_ESTIMATE_CAP = 50000; // just a visual reference ceiling, not a real API limit
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // ---------- AUTH ----------
+  function showApp() {
+    $('login-screen').style.display = 'none';
+    $('app').style.display = 'block';
+    $('current-user').textContent = '@' + currentUsername;
+    loadArchive();
+  }
+
+  $('toggle-mode').addEventListener('click', () => {
+    isRegisterMode = !isRegisterMode;
+    $('login-title').textContent = isRegisterMode ? 'Register at the desk' : 'Sign in to the desk';
+    $('login-submit').textContent = isRegisterMode ? 'Create account' : 'Sign in';
+    $('toggle-mode').textContent = isRegisterMode ? 'Already have an account? Sign in →' : 'Need an account? Register instead →';
+    $('login-error').textContent = '';
+  });
+
+  $('login-submit').addEventListener('click', async () => {
+    const username = $('login-username').value.trim();
+    const password = $('login-password').value;
+    $('login-error').textContent = '';
+    $('login-submit').disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: isRegisterMode ? 'signup' : 'login', username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+      sessionToken = data.token;
+      currentUsername = data.username;
+      localStorage.setItem('deskwire_token', sessionToken);
+      localStorage.setItem('deskwire_username', currentUsername);
+      showApp();
+    } catch (err) {
+      $('login-error').textContent = err.message;
+    } finally {
+      $('login-submit').disabled = false;
+    }
+  });
+
+  $('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('deskwire_token');
+    localStorage.removeItem('deskwire_username');
+    sessionToken = null;
+    currentUsername = null;
+    $('app').style.display = 'none';
+    $('login-screen').style.display = 'block';
+  });
+
+  // Check for share link on load
+  const urlParams = new URLSearchParams(window.location.search);
+  const shareId = urlParams.get('share');
+
+  if (sessionToken && currentUsername) {
+    showApp();
+  } else if (!shareId) {
+    // stay on login
+  }
+
+  if (shareId) {
+    fetch(`${API_BASE}/api/archive?share=${shareId}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.run) {
+          document.title = `DESKWIRE — ${data.run.topic}`;
+          if (sessionToken) showApp();
+          else { $('login-screen').style.display = 'none'; $('app').style.display = 'block'; }
+          $('empty-state').style.display = 'none';
+          $('topic').value = data.run.topic;
+          $('stage-final').classList.add('visible');
+          $('dot-final').classList.add('done');
+          $('out-final').textContent = data.run.final;
+          toast('Loaded shared dispatch');
+        }
+      }).catch(() => {});
+  }
+
+  // ---------- CONFIG UI ----------
+  $('chk-search').addEventListener('change', (e) => $('pill-search').classList.toggle('active', e.target.checked));
+  $('chk-extra-cycle').addEventListener('change', (e) => $('pill-cycles').classList.toggle('active', e.target.checked));
+  $('model-picker').addEventListener('change', (e) => {
+    $('model-label').textContent = e.target.options[e.target.selectedIndex].text;
+  });
+  $('toggle-prompts').addEventListener('click', () => $('prompt-editor').classList.toggle('open'));
+
+  document.querySelectorAll('.skip-chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('active'));
+  });
+  function isSkipped(stage) { return $(`skip-${stage === 'researcher' ? 'research' : stage === 'writer' ? 'writer' : 'critic'}`)?.classList.contains('active'); }
+
+  // ---------- STREAMING AGENT CALL ----------
+  async function streamAgent(role, input, topic, onToken, signal) {
+    const promptOverride = $(`prompt-${role}`)?.value.trim();
+    const res = await fetch(`${API_BASE}/api/agent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+      },
+      body: JSON.stringify({
+        role, input, topic,
+        useSearch: $('chk-search').checked,
+        model: $('model-picker').value,
+        systemPrompt: promptOverride || undefined,
+      }),
+      signal,
+    });
+    if (!res.ok || !res.body) throw new Error(await res.text());
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let full = '';
+    let finalPayload = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const chunks = buffer.split('\n\n');
+      buffer = chunks.pop();
+      for (const chunk of chunks) {
+        const lines = chunk.split('\n');
+        let event = 'message', data = '';
+        for (const line of lines) {
+          if (line.startsWith('event:')) event = line.slice(6).trim();
+          if (line.startsWith('data:')) data = line.slice(5).trim();
+        }
+        if (!data) continue;
+        const parsed = JSON.parse(data);
+        if (event === 'token') { full += parsed.text; onToken(full); }
+        else if (event === 'done') finalPayload = parsed;
+        else if (event === 'error') throw new Error(parsed.message);
+      }
+    }
+    return finalPayload || { output: full };
+  }
+
+  // ---------- STAGE HELPERS ----------
+  function showStage(name) {
+    $(`stage-${name}`).classList.add('visible');
+    $(`dot-${name}`).classList.add('working');
+    $(`stage-${name}`)._start = Date.now();
+    $(`stage-${name}`)._timer = setInterval(() => {
+      $(`time-${name}`).textContent = ((Date.now() - $(`stage-${name}`)._start) / 1000).toFixed(1) + 's';
+    }, 100);
+  }
+  function finishStage(name, text, usage) {
+    clearInterval($(`stage-${name}`)._timer);
+    $(`time-${name}`).textContent = ((Date.now() - $(`stage-${name}`)._start) / 1000).toFixed(1) + 's';
+    $(`dot-${name}`).classList.remove('working');
+    $(`dot-${name}`).classList.add('done');
+    $(`out-${name}`).textContent = text;
+    if (usage?.total_tokens) {
+      $(`tok-${name}`).textContent = usage.total_tokens + ' tok';
+      sessionTokenTotal += usage.total_tokens;
+      updateQuota();
+    }
+  }
+  function updateQuota() {
+    $('quota-text').textContent = `${sessionTokenTotal.toLocaleString()} tokens this session`;
+    $('quota-fill').style.width = Math.min(100, (sessionTokenTotal / QUOTA_ESTIMATE_CAP) * 100) + '%';
+  }
+  function resetFeed() {
+    ['researcher', 'writer', 'critic', 'final'].forEach((name) => {
+      $(`stage-${name}`).classList.remove('visible');
+      $(`dot-${name}`).classList.remove('working', 'done');
+      $(`out-${name}`).textContent = '';
+      $(`time-${name}`).textContent = '';
+      $(`tok-${name}`).textContent = '';
+    });
+    $('sources-box').style.display = 'none';
+    $('diff-box').classList.remove('open');
+    $('word-count').textContent = '';
+    $('empty-state').style.display = 'none';
+  }
+
+  function renderSources(sourcesText) {
+    if (!sourcesText) return;
+    $('sources-box').style.display = 'block';
+    const blocks = sourcesText.split('\n\n');
+    $('sources-list').innerHTML = blocks.map(b => {
+      const urlMatch = b.match(/URL: (\S+)/);
+      const titleMatch = b.match(/^\[\d+\] (.+)/);
+      if (!urlMatch) return '';
+      return `<a href="${urlMatch[1]}" target="_blank" rel="noopener">${titleMatch ? titleMatch[1] : urlMatch[1]}</a>`;
+    }).join('');
+  }
+
+  function simpleDiff(a, b) {
+    const aw = a.split(/(\s+)/), bw = b.split(/(\s+)/);
+    const dp = Array.from({ length: aw.length + 1 }, () => new Array(bw.length + 1).fill(0));
+    for (let i = aw.length - 1; i >= 0; i--)
+      for (let j = bw.length - 1; j >= 0; j--)
+        dp[i][j] = aw[i] === bw[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+    let i = 0, j = 0, html = '';
+    while (i < aw.length && j < bw.length) {
+      if (aw[i] === bw[j]) { html += aw[i]; i++; j++; }
+      else if (dp[i+1][j] >= dp[i][j+1]) { html += `<span class="diff-del">${aw[i]}</span>`; i++; }
+      else { html += `<span class="diff-add">${bw[j]}</span>`; j++; }
+    }
+    while (i < aw.length) { html += `<span class="diff-del">${aw[i]}</span>`; i++; }
+    while (j < bw.length) { html += `<span class="diff-add">${bw[j]}</span>`; j++; }
+    return html;
+  }
+
+  // ---------- PIPELINE ----------
+  let lastRun = {};
+
+  async function runPipeline(topic) {
+    resetFeed();
+    $('run').disabled = true;
+    $('run').textContent = 'Wire running…';
+    $('cancel-run').style.display = 'inline-block';
+    activeAbortController = new AbortController();
+    const signal = activeAbortController.signal;
+
+    try {
+      let findings = '', draft = '', critique = '', sources = '';
+
+      if (!isSkipped('researcher')) {
+        showStage('researcher');
+        const r = await streamAgent('researcher', `Topic: ${topic}`, topic, (t) => $('out-researcher').textContent = t, signal);
+        findings = r.output; sources = r.sources;
+        finishStage('researcher', findings, r.usage);
+        renderSources(sources);
+      } else {
+        findings = '(research skipped by user)';
+      }
+
+      if (!isSkipped('writer')) {
+        showStage('writer');
+        const w = await streamAgent('writer', `Topic: ${topic}\n\nResearch findings:\n${findings}`, topic, (t) => $('out-writer').textContent = t, signal);
+        draft = w.output;
+        finishStage('writer', draft, w.usage);
+      } else {
+        draft = '(draft skipped by user)';
+      }
+
+      if (!isSkipped('critic')) {
+        showStage('critic');
+        const c = await streamAgent('critic', `Findings:\n${findings}\n\nDraft:\n${draft}`, topic, (t) => $('out-critic').textContent = t, signal);
+        critique = c.output;
+        finishStage('critic', critique, c.usage);
+      } else {
+        critique = '(critique skipped by user)';
+      }
+
+      let workingDraft = draft;
+      if ($('chk-extra-cycle').checked && !isSkipped('critic')) {
+        const revised = await streamAgent('writer', `Topic: ${topic}\n\nOriginal findings:\n${findings}\n\nYour previous draft:\n${workingDraft}\n\nCritic feedback to address:\n${critique}\n\nWrite the revised version.`, topic, () => {}, signal);
+        workingDraft = revised.output;
+        const critique2 = await streamAgent('critic', `Findings:\n${findings}\n\nDraft:\n${workingDraft}`, topic, () => {}, signal);
+        critique += '\n\n— second pass —\n\n' + critique2.output;
+        $('out-critic').textContent = critique;
+      }
+
+      showStage('final');
+      const f = await streamAgent('writer', `Topic: ${topic}\n\nOriginal findings:\n${findings}\n\nYour previous draft:\n${workingDraft}\n\nCritic feedback to address:\n${critique}\n\nWrite the revised, final version.`, topic, (t) => $('out-final').textContent = t, signal);
+      finishStage('final', f.output, f.usage);
+
+      const words = f.output.trim().split(/\s+/).length;
+      $('word-count').textContent = `${words} words · ~${Math.ceil(words / 200)} min read`;
+
+      $('diff-box').innerHTML = simpleDiff(draft, f.output);
+      lastRun = { topic, findings, draft, critique, final: f.output, model: $('model-picker').value };
+
+      toast('Cleared for print ✓');
+    } catch (err) {
+      if (err.name === 'AbortError') toast('Run cancelled');
+      else toast('Wire error: ' + err.message);
+    } finally {
+      $('run').disabled = false;
+      $('run').textContent = 'Run the desk';
+      $('cancel-run').style.display = 'none';
+      activeAbortController = null;
+    }
+  }
+
+  $('run').addEventListener('click', () => {
+    const topic = $('topic').value.trim();
+    if (!topic) { toast('File an assignment first'); return; }
+    runPipeline(topic);
+  });
+  $('cancel-run').addEventListener('click', () => activeAbortController?.abort());
+  $('retry-run').addEventListener('click', () => { const t = $('topic').value.trim(); if (t) runPipeline(t); });
+  $('topic').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $('run').click(); });
+
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText($(`out-${btn.getAttribute('data-copy')}`).textContent);
+      toast('Copied to clipboard');
+    });
+  });
+
+  $('toggle-diff').addEventListener('click', () => $('diff-box').classList.toggle('open'));
+
+  $('export-md').addEventListener('click', () => {
+    const topic = $('topic').value.trim() || 'dispatch';
+    const blob = new Blob([`# ${topic}\n\n${$('out-final').textContent}`], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = topic.slice(0, 40).replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.md';
+    a.click();
+  });
+
+  $('export-pdf').addEventListener('click', () => {
+    const topic = $('topic').value.trim() || 'dispatch';
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>${topic}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:40px auto;line-height:1.7;white-space:pre-wrap;}</style></head><body><h1>${topic}</h1>${$('out-final').textContent.replace(/</g,'&lt;')}</body></html>`);
+    w.document.close();
+    w.print();
+  });
+
+  // ---------- SAVE / SHARE / ARCHIVE ----------
+  $('save-run').addEventListener('click', async () => {
+    if (!lastRun.final) { toast('Nothing to save yet'); return; }
+    const tags = $('tag-input').value.split(',').map(t => t.trim()).filter(Boolean);
+    try {
+      const res = await fetch(`${API_BASE}/api/archive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+        body: JSON.stringify({ ...lastRun, tags }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      lastRun.id = data.id;
+      toast('Saved to archive');
+      loadArchive();
+    } catch (err) {
+      toast('Save failed: ' + err.message);
+    }
+  });
+
+  $('share-run').addEventListener('click', async () => {
+    if (!lastRun.id) {
+      toast('Save to archive first, then share');
+      return;
+    }
+    const url = `${window.location.origin}${window.location.pathname}?share=${lastRun.id}`;
+    navigator.clipboard.writeText(url);
+    toast('Share link copied');
+  });
+
+  let archiveCache = [];
+  async function loadArchive() {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/archive`, { headers: { Authorization: `Bearer ${sessionToken}` } });
+      const data = await res.json();
+      archiveCache = data.runs || [];
+      renderArchive(archiveCache);
+    } catch { /* silent */ }
+  }
+
+  function renderArchive(list) {
+    $('archive-count').textContent = list.length;
+    $('archive-list').innerHTML = list.map(item => `
+      <div class="archive-item" data-id="${item.id}">
+        <span>${item.topic.slice(0, 50)}</span>
+        <span class="ai-tags">${(item.tags || []).map(t => `<span>${t}</span>`).join('')}</span>
+        <span>${new Date(item.createdAt).toLocaleDateString()}</span>
+        <button class="archive-del" data-del="${item.id}">✕</button>
+      </div>
+    `).join('') || '<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">No saved dispatches yet.</div>';
+
+    document.querySelectorAll('.archive-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.dataset.del) return;
+        const item = archiveCache.find(x => x.id === el.dataset.id);
+        if (!item) return;
+        resetFeed();
+        $('topic').value = item.topic;
+        $('stage-final').classList.add('visible');
+        $('dot-final').classList.add('done');
+        $('out-final').textContent = item.final;
+        lastRun = item;
+      });
+    });
+    document.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.del;
+        await fetch(`${API_BASE}/api/archive?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${sessionToken}` } });
+        toast('Deleted');
+        loadArchive();
+      });
+    });
+  }
+
+  $('archive-toggle').addEventListener('click', () => {
+    $('archive-list').classList.toggle('open');
+    $('archive-filter').classList.toggle('open');
+    $('archive-caret').textContent = $('archive-list').classList.contains('open') ? '▴' : '▾';
+  });
+  $('archive-search').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    renderArchive(archiveCache.filter(item =>
+      item.topic.toLowerCase().includes(q) || (item.tags || []).some(t => t.toLowerCase().includes(q))
+    ));
+  });
+
+  updateQuota();
+</script>
+</body>
+</html>
