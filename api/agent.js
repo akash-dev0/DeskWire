@@ -5,8 +5,8 @@
 //
 // Body: { role, input, topic, useSearch, model, systemPrompt }
 // role: "researcher" | "writer" | "critic"
-
-import { verifyToken } from './auth.js';
+//
+// No login or database needed: anyone can run the pipeline.
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const TAVILY_URL = 'https://api.tavily.com/search';
@@ -60,12 +60,6 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-
-  // Auth optional here: allow anonymous use, but attach username if present
-  // so callers can be rate-limited or tracked later.
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.replace('Bearer ', '');
-  const user = verifyToken(token);
 
   const {
     role,
