@@ -11,7 +11,7 @@ import { verifyToken } from './auth.js';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const TAVILY_URL = 'https://api.tavily.com/search';
 
-const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
+const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 const ALLOWED_MODELS = [
   'llama-3.3-70b-versatile',
   'llama-3.1-8b-instant',
